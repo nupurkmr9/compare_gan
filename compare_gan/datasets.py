@@ -239,7 +239,7 @@ class ImageDatasetV2(object):
       return self._make_fake_dataset(split)
     ds = tfds.load(
         self._tfds_name,
-        split=None,
+        split=split,
         data_dir=FLAGS.tfds_data_dir,
         as_dataset_kwargs={"shuffle_files": False})
     ds = self._replace_labels(split, ds)
