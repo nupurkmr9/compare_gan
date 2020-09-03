@@ -83,7 +83,7 @@ def _update_bn_accumulators(sess, generated, num_accu_examples):
   sess.run([tf.assign(v, 1) for v in update_accu_switches])
   batch_size = generated.shape[0].value
   num_batches = num_accu_examples // batch_size
-  for i in range(num_batches):
+  for i in range(1):
     if i % 500 == 0:
       logging.info("Updating BN accumulators %d/%d steps.", i, num_batches)
     sess.run(generated)
