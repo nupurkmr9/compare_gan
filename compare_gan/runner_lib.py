@@ -158,7 +158,7 @@ class TaskManager(object):
         # number.
         unevaluated_checkpoints = checkpoints - evaluated_checkpoints
         step_and_ckpt = sorted(
-            [(int(x.split("-")[-1]), x) for x in unevaluated_checkpoints])
+            [(int(x.split("-")[-1]), x) for x in unevaluated_checkpoints if int(x.split("-")[-1])> 50000 ])
         if eval_every_steps:
           step_and_ckpt = [(step, ckpt) for step, ckpt in step_and_ckpt
                            if step > 0 and step % eval_every_steps == 0]
