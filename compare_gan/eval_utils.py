@@ -154,6 +154,7 @@ def sample_fake_dataset(sess, generator, num_batches):
       raise NanFoundError("Detected NaN in fake images.")
     samples.append(x)
   fake_images = np.concatenate(samples, axis=0)
+  print(fake_images.min() , fake_images.max())
   fake_images *= 255.0
   # Convert 1-channel datasets (like MNIST) to 3 channels.
   if fake_images.shape[3] == 1:
