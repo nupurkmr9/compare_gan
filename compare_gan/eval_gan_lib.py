@@ -114,7 +114,7 @@ def evaluate_tfhub_module(module_spec, eval_tasks, use_tpu,
   num_test_examples = dataset.eval_test_samples
 
   batch_size = 64
-  num_batches = int(np.ceil(num_test_examples / batch_size))
+  num_batches = 5 #int(np.ceil(num_test_examples / batch_size))
 
   # Load and update the generator.
   result_dict = {}
