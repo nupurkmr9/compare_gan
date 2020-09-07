@@ -11,6 +11,7 @@ dataset.name = "imagenet_128"
 options.z_dim = 120
 
 options.architecture = "resnet_biggan_arch"
+options.aux_net = "aux_network_aet_v2"
 ModularGAN_Aux_Task_AET_v2.conditional = True
 options.batch_size = 16
 options.gan_class = @ModularGAN_Aux_Task_AET_v2
