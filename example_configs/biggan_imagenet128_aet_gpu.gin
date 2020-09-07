@@ -13,7 +13,7 @@ options.z_dim = 120
 options.architecture = "resnet_biggan_arch"
 options.aux_net = "aux_network_aet_v2"
 ModularGAN_Aux_Task_AET_v2.conditional = True
-options.batch_size = 16
+options.batch_size = 8
 options.gan_class = @ModularGAN_Aux_Task_AET_v2
 options.lamba = 1
 options.training_steps = 250000
@@ -53,12 +53,12 @@ run_config.save_checkpoints_steps = 2500
 
 
 
-ModularGAN_Aux_Task_AET_v2.d_bs = 8
-ModularGAN_Aux_Task_AET_v2.g_bs = 16
+ModularGAN_Aux_Task_AET_v2.d_bs = 4
+ModularGAN_Aux_Task_AET_v2.g_bs = 8
 ModularGAN_Aux_Task_AET_v2.aux_ip_size = 1
 ModularGAN_Aux_Task_AET_v2.aux_ip_channels = 1536
 ModularGAN_Aux_Task_AET_v2.aux_avg_pool_sz = 4
-ModularGAN_Aux_Task_AET_v2.num_eps = 16
+ModularGAN_Aux_Task_AET_v2.num_eps = 8
 ModularGAN_Aux_Task_AET_v2.eps_max = 0.4
 ModularGAN_Aux_Task_AET_v2.aux_lr = 0.001
 ModularGAN_Aux_Task_AET_v2.lambda_bce_loss = 2.0
