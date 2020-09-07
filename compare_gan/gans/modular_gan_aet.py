@@ -1,3 +1,41 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import functools
+import itertools
+
+from absl import flags
+from absl import logging
+from compare_gan import test_utils
+from compare_gan import utils
+from compare_gan.architectures import dcgan
+from compare_gan.architectures import infogan
+from compare_gan.architectures import resnet30
+from compare_gan.architectures import resnet5
+from compare_gan.architectures import resnet_biggan
+from compare_gan.architectures import resnet_biggan_deep
+from compare_gan.architectures import resnet_cifar
+from compare_gan.architectures import resnet_stl
+from compare_gan.architectures import sndcgan
+from compare_gan.gans import consts as c
+from compare_gan.gans import loss_lib
+from compare_gan.gans import penalty_lib
+from compare_gan.gans.abstract_gan import AbstractGAN
+from compare_gan.tpu import tpu_random
+from compare_gan.tpu import tpu_summaries
+import gin
+import numpy as np
+from six.moves import range
+import tensorflow as tf
+import tensorflow_gan as tfgan
+import tensorflow_hub as hub
+
+from compare_gan.architectures import aux_network
+import random
+
+FLAGS = flags.FLAGS
+
 # This version is for starting AET training from specified checkpoint (by warm-starting variables).
 @gin.configurable(blacklist=["dataset", "parameters", "model_dir"])
 class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
@@ -238,7 +276,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         use_tpu=use_tpu,
         model_fn=self.model_fn,
         train_batch_size=batch_size * num_sub_steps)
-    
+
   def _module_fn(self, model, batch_size):
     """Module Function to create a TF Hub module spec.
 
