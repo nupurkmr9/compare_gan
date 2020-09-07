@@ -547,7 +547,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         f["generated"] = self.generator(f["z"], y=sampled_y, is_training=True)
         f["eps_generated"] = self.generator(tf.add(f["z"], f["eps"]), y=sampled_y, is_training=True)
         f["disc_generated"] = self.generator(f["z"][:self._d_bs], y=sampled_y[:self._d_bs], is_training=True)
-        f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:self._d_bs], y=sampled_y[:self._d_bs], is_training=True)
+        f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:self._d_bs], y=sampled_y[self._d_bs:], is_training=True)
         
     # print("6: ", fs, ls)
     # import sys 
@@ -748,7 +748,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     if self.conditional: # Not modified to have different batch sizes for d_real, d_fake and g.
       y = self._get_one_hot_labels(labels)
       sampled_y = self._get_one_hot_labels(features["sampled_labels"])
-      all_y = tf.concat([y, sampled_y, sampled_y], axis=0)
+      all_y = tf.concat([y, sampled_y], axis=0)
     else:
       y = None
       sampled_y = None
