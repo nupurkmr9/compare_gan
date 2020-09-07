@@ -240,8 +240,9 @@ class TaskManagerWithCsvResults(TaskManager):
     return set()
 
 
+@gin.configurable("run_eval")
 def _run_eval(module_spec, checkpoints, task_manager, run_config,
-              use_tpu, num_averaging_runs):
+              use_tpu, num_averaging_runs, start_step=0):
   """Evaluates the given checkpoints and add results to a result writer.
 
   Args:
@@ -265,7 +266,9 @@ def _run_eval(module_spec, checkpoints, task_manager, run_config,
 
   for checkpoint_path in checkpoints:
     step = os.path.basename(checkpoint_path).split("-")[-1]
-    if step == 0:
+    # if step == 0:
+    #   continue
+    if int(step) <= int(start_step):
       continue
     export_path = os.path.join(run_config.model_dir, "tfhub", str(step))
     if not tf.gfile.Exists(export_path):
@@ -283,6 +286,7 @@ def _run_eval(module_spec, checkpoints, task_manager, run_config,
     logging.info("Evaluation result for checkpoint %s: %s (default value: %s)",
                  checkpoint_path, result_dict, default_value)
     task_manager.add_eval_result(checkpoint_path, result_dict, default_value)
+
 
 
 def run_with_schedule(schedule, run_config, task_manager, options, use_tpu,
