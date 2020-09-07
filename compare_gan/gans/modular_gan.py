@@ -200,10 +200,6 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
           c.RESNET_CIFAR_ARCH: resnet_cifar.Generator,
           c.RESNET_STL_ARCH: resnet_stl.Generator,
           c.SNDCGAN_ARCH: sndcgan.Generator,
-          c.SNDCGAN_ARCH_V2: sndcgan.Generator,
-          c.SNDCGAN_ARCH_V3: sndcgan.Generator,
-          c.RESNET_CIFAR_ARCH_V2: resnet_cifar.Generator,
-          c.RESNET_CIFAR_ARCH_V3: resnet_cifar.Generator,
       }
       if self._architecture not in architecture_fns:
         raise NotImplementedError(
@@ -228,10 +224,6 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
           c.RESNET_CIFAR_ARCH: resnet_cifar.Discriminator,
           c.RESNET_STL_ARCH: resnet_stl.Discriminator,
           c.SNDCGAN_ARCH: sndcgan.Discriminator,
-          c.SNDCGAN_ARCH_V2: sndcgan.Discriminator_v2,
-          c.SNDCGAN_ARCH_V3: sndcgan.Discriminator_v3,
-          c.RESNET_CIFAR_ARCH_V2: resnet_cifar.Discriminator_v2,
-          c.RESNET_CIFAR_ARCH_V3: resnet_cifar.Discriminator_v3,
       }
       if self._architecture not in architecture_fns:
         raise NotImplementedError(
