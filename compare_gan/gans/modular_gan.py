@@ -546,8 +546,8 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         sampled_y = f.get("sampled_y", None)
         f["generated"] = self.generator(f["z"], y=sampled_y, is_training=True)
         f["eps_generated"] = self.generator(tf.add(f["z"], f["eps"]), y=sampled_y, is_training=True)
-        f["disc_generated"] = self.generator(f["z"][:self._d_bs], y=sampled_y, is_training=True)
-        f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:self._d_bs], y=sampled_y, is_training=True)
+        f["disc_generated"] = self.generator(f["z"][:self._d_bs], y=sampled_y[:self._d_bs], is_training=True)
+        f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:self._d_bs], y=sampled_y[:self._d_bs], is_training=True)
         
     # print("6: ", fs, ls)
     # import sys 
