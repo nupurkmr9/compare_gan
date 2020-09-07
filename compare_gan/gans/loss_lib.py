@@ -125,6 +125,28 @@ def least_squares(d_real, d_fake, d_real_logits=None, d_fake_logits=None):
     return d_loss, d_loss_real, d_loss_fake, g_loss
 
 
+# @gin.configurable(whitelist=[])
+# def hinge(d_real_logits, d_fake_logits, d_real=None, d_fake=None):
+#   """Returns the discriminator and generator loss for the hinge loss.
+
+#   Args:
+#     d_real_logits: logits for real points, shape [batch_size, 1].
+#     d_fake_logits: logits for fake points, shape [batch_size, 1].
+#     d_real: ignored.
+#     d_fake: ignored.
+
+#   Returns:
+#     A tuple consisting of the discriminator loss, discriminator's loss on the
+#     real samples and fake samples, and the generator's loss.
+#   """
+#   with tf.name_scope("hinge_loss"):
+#     check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits)
+#     d_loss_real = tf.reduce_mean(tf.nn.relu(1.0 - d_real_logits))
+#     d_loss_fake = tf.reduce_mean(tf.nn.relu(1.0 + d_fake_logits))
+#     d_loss = d_loss_real + d_loss_fake
+#     g_loss = - tf.reduce_mean(d_fake_logits)
+#     return d_loss, d_loss_real, d_loss_fake, g_loss
+
 @gin.configurable(whitelist=[])
 def hinge(d_real_logits, d_fake_logits, d_real=None, d_fake=None):
   """Returns the discriminator and generator loss for the hinge loss.
@@ -139,13 +161,20 @@ def hinge(d_real_logits, d_fake_logits, d_real=None, d_fake=None):
     A tuple consisting of the discriminator loss, discriminator's loss on the
     real samples and fake samples, and the generator's loss.
   """
+  if d_real is None and d_real_logits is None:
+    with tf.name_scope("hinge_loss"):
+      d_loss_fake = tf.reduce_mean(tf.nn.relu(1.0 + d_fake_logits))
+      g_loss = - tf.reduce_mean(d_fake_logits)
+      return d_loss_fake, None, d_loss_fake, g_loss
   with tf.name_scope("hinge_loss"):
-    check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits)
+    # check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits)
     d_loss_real = tf.reduce_mean(tf.nn.relu(1.0 - d_real_logits))
     d_loss_fake = tf.reduce_mean(tf.nn.relu(1.0 + d_fake_logits))
     d_loss = d_loss_real + d_loss_fake
     g_loss = - tf.reduce_mean(d_fake_logits)
     return d_loss, d_loss_real, d_loss_fake, g_loss
+
+
 
 
 @gin.configurable("loss", whitelist=["fn"])
