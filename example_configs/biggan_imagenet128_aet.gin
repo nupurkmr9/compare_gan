@@ -11,9 +11,9 @@ dataset.name = "imagenet_128"
 options.z_dim = 120
 
 options.architecture = "resnet_biggan_arch"
-ModularGAN.conditional = True
 options.batch_size = 2048
 options.gan_class = @ModularGAN_Aux_Task_AET_v2
+ModularGAN_Aux_Task_AET_v2.conditional = True
 options.lamba = 1
 options.training_steps = 250000
 weights.initializer = "orthogonal"
