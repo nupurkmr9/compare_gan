@@ -76,8 +76,12 @@ def get_options_dict(batch_size=gin.REQUIRED,
                      training_steps=gin.REQUIRED,
                      discriminator_normalization=None,
                      lamba=1,
+                     consistency_ratio=10,
+                     augment_w=4,
                      disc_iters=1,
-                     z_dim=128):
+                     z_dim=128, 
+                     gen_iters=1,
+                     aux_net='aux_network_v1'):
   """Parse legacy options from Gin configurations into a Python dict.
 
   Args:
@@ -106,8 +110,12 @@ def get_options_dict(batch_size=gin.REQUIRED,
       "architecture": architecture,
       "training_steps": training_steps,
       "lambda": lamba,  # Different spelling intended.
+      "consistency_ratio": consistency_ratio,
+      "augment_w": augment_w,
       "disc_iters": disc_iters,
       "z_dim": z_dim,
+      "gen_iters": gen_iters,
+      "aux_net": aux_net,
   }
 
 
