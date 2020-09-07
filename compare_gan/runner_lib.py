@@ -158,7 +158,7 @@ class TaskManager(object):
         # number.
         unevaluated_checkpoints = checkpoints - evaluated_checkpoints
         step_and_ckpt = sorted(
-            [(int(x.split("-")[-1]), x) for x in unevaluated_checkpoints if int(x.split("-")[-1])> 50000 ])
+            [(int(x.split("-")[-1]), x) for x in unevaluated_checkpoints if int(x.split("-")[-1])> 60000 ])
         if eval_every_steps:
           step_and_ckpt = [(step, ckpt) for step, ckpt in step_and_ckpt
                            if step > 0 and step % eval_every_steps == 0]
@@ -199,7 +199,7 @@ class TaskManagerWithCsvResults(TaskManager):
     get_step = lambda fn: int(re.findall(r"operative_config-(\d+).gin", fn)[0])
     config_steps = [get_step(fn) for fn in saved_configs]
     assert config_steps
-    last_config_step = sorted([s for s in config_steps if s <= step])[-1]
+    last_config_step = sorted([int(s) for s in config_steps if int(s) <= int(step) ])[-1]
     config_path = os.path.join(
         self.model_dir, "operative_config-{}.gin".format(last_config_step))
     return _parse_gin_config(config_path)
