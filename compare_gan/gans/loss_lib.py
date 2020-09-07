@@ -50,6 +50,35 @@ def check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits):
     _check_pair(d_real.shape.as_list(), d_real_logits.shape.as_list())
 
 
+# @gin.configurable(whitelist=[])
+# def non_saturating(d_real_logits, d_fake_logits, d_real=None, d_fake=None):
+#   """Returns the discriminator and generator loss for Non-saturating loss.
+
+#   Args:
+#     d_real_logits: logits for real points, shape [batch_size, 1].
+#     d_fake_logits: logits for fake points, shape [batch_size, 1].
+#     d_real: ignored.
+#     d_fake: ignored.
+
+#   Returns:
+#     A tuple consisting of the discriminator loss, discriminator's loss on the
+#     real samples and fake samples, and the generator's loss.
+#   """
+#   with tf.name_scope("non_saturating_loss"):
+#     check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits)
+#     d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+#         logits=d_real_logits, labels=tf.ones_like(d_real_logits),
+#         name="cross_entropy_d_real"))
+#     d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+#         logits=d_fake_logits, labels=tf.zeros_like(d_fake_logits),
+#         name="cross_entropy_d_fake"))
+#     d_loss = d_loss_real + d_loss_fake
+#     g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+#         logits=d_fake_logits, labels=tf.ones_like(d_fake_logits),
+#         name="cross_entropy_g"))
+#     return d_loss, d_loss_real, d_loss_fake, g_loss
+
+
 @gin.configurable(whitelist=[])
 def non_saturating(d_real_logits, d_fake_logits, d_real=None, d_fake=None):
   """Returns the discriminator and generator loss for Non-saturating loss.
@@ -64,8 +93,17 @@ def non_saturating(d_real_logits, d_fake_logits, d_real=None, d_fake=None):
     A tuple consisting of the discriminator loss, discriminator's loss on the
     real samples and fake samples, and the generator's loss.
   """
+  if d_real is None and d_real_logits is None:
+    with tf.name_scope("non_saturating_loss"):
+      d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=d_fake_logits, labels=tf.zeros_like(d_fake_logits),
+        name="cross_entropy_d_fake"))
+      g_loss = - tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=d_fake_logits, labels=tf.ones_like(d_fake_logits),
+        name="cross_entropy_g"))
+      return d_loss_fake, None, d_loss_fake, g_loss
   with tf.name_scope("non_saturating_loss"):
-    check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits)
+    # check_dimensions(d_real, d_fake, d_real_logits, d_fake_logits)
     d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
         logits=d_real_logits, labels=tf.ones_like(d_real_logits),
         name="cross_entropy_d_real"))

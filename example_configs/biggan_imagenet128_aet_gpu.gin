@@ -50,7 +50,7 @@ eval_z.distribution_fn = @tf.random.normal
 
 run_config.iterations_per_loop = 500
 run_config.save_checkpoints_steps = 2500
-
+run_eval.start_step = 40000
 
 
 ModularGAN_Aux_Task_AET_v2.d_bs = 4
