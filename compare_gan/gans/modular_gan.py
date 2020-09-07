@@ -826,10 +826,10 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
 
     self.g_loss = g_loss + g_loss_eps
     
-    D_in_op_g = tf.nn.avg_pool2d(D_in_op_g, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
-                                 [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
-    D_in_op_eg = tf.nn.avg_pool2d(D_in_op_eg, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
-                                 [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_eg")
+    # D_in_op_g = tf.nn.avg_pool2d(D_in_op_g, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
+    #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
+    # D_in_op_eg = tf.nn.avg_pool2d(D_in_op_eg, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
+    #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_eg")
     D_in_op_g = tf.reshape(D_in_op_g, [self._g_bs, -1], name="reshape_g")
     D_in_op_eg = tf.reshape(D_in_op_eg, [self._g_bs, -1], name="reshape_eg")
     
