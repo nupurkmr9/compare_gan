@@ -31,7 +31,7 @@ from compare_gan import datasets
 from compare_gan import runner_lib
 # Import GAN types so that they can be used in Gin configs without module names.
 # from compare_gan.gans.modular_gan import ModularGAN
-from compare_gan.gans.modular_gan_aet import ModularGAN_Aux_Task_AET_v2
+from compare_gan.gans.modular_gan import ModularGAN_Aux_Task_AET_v2
 from compare_gan.gans.s3gan import S3GAN
 from compare_gan.gans.ssgan import SSGAN
 
