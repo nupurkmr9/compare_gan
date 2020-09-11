@@ -261,7 +261,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
 
   def as_estimator(self, run_config, batch_size, use_tpu):
     """Returns a TPUEstimator for this GAN."""
-    unroll_graph = self._experimental_force_graph_unroll or use_tpu
+    unroll_graph = self._experimental_force_graph_unroll #or use_tpu
     num_sub_steps = self._get_num_sub_steps(unroll_graph=unroll_graph)
     return tf.contrib.tpu.TPUEstimator(
         config=run_config,
