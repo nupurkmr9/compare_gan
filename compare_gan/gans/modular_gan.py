@@ -473,7 +473,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     Returns:
       A `tf.data.Dataset` object with batched features and labels.
     """
-    # print("params: ", params) # {'batch_size': 64}
+    print("params: ", params) # {'batch_size': 64}
     self._real_d_bs = params['batch_size']
     return self._dataset.input_fn(mode=mode, params=params,
                                   preprocess_fn=self._preprocess_fn)
