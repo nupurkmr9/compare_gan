@@ -444,12 +444,17 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     logging.info("_preprocess_fn(): images=%s, labels=%s, seed=%s",
                  images, labels, seed)
     tf.set_random_seed(seed)
-    # z_ = self.z_generator([self._z_dim], name="z")
-    # print(tf.shape(images)) # Tensor("Shape_1:0", shape=(3,), dtype=int32)
-    # print(tf.shape(z_)) # Tensor("Shape_2:0", shape=(1,), dtype=int32)
+
     features = {
-        "images": images
+        "images": images,
+        "z": self.z_generator([self._z_dim], name="z"),
     }
+    # # z_ = self.z_generator([self._z_dim], name="z")
+    # # print(tf.shape(images)) # Tensor("Shape_1:0", shape=(3,), dtype=int32)
+    # # print(tf.shape(z_)) # Tensor("Shape_2:0", shape=(1,), dtype=int32)
+    # features = {
+    #     "images": images
+    # }
     if self.conditional:
       if self._fit_label_distribution:
         features["sampled_labels"] = labels
@@ -489,7 +494,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         
     # Assuming num_sub_steps = 1 (which is true for GPU) for below code to work:
     
-    features["z"] = self.z_generator([num_sub_steps*self._g_bs, self._z_dim], name="z")
+    # features["z"] = self.z_generator([num_sub_steps*self._g_bs, self._z_dim], name="z")
     
     if self._which_eps_distr == 'trunc_normal':
         self.eps_distr = tfp.distributions.TruncatedNormal(loc=0.0, scale=1.0, low=self._eps_min, high=self._eps_max)
@@ -503,12 +508,12 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         features["random_mask"] = tf.less(features["random"], 0.5, name="random_mask")
         features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[self._num_eps, self._z_dim]), tf.constant(self._eps_min, shape=[self._num_eps, self._z_dim]), name="eps_original")
     elif self._which_eps_distr == 'multi_label_classification_group':
-        features["random"] = tf.random.uniform(shape=[num_sub_steps*self._num_eps, self._num_groups], minval=0.0, maxval=1.0, name="random")
+        features["random"] = tf.random.uniform(shape=[features["z"].shape[0], self._num_groups], minval=0.0, maxval=1.0, name="random")
         features["random_mask"] = tf.less(features["random"], 0.5, name="random_mask")
-        features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[num_sub_steps*self._num_eps, self._num_groups]), tf.constant(self._eps_min, shape=[num_sub_steps*self._num_eps, self._num_groups]), name="eps_original")
-        features["eps_original"] = tf.reshape(features["eps_original"], [num_sub_steps*self._num_eps, -1, 1], name="reshape_eps_1")
+        features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[features["z"].shape[0], self._num_groups]), tf.constant(self._eps_min, shape=[features["z"].shape[0], self._num_groups]), name="eps_original")
+        features["eps_original"] = tf.reshape(features["eps_original"], [features["z"].shape[0], -1, 1], name="reshape_eps_1")
         features["eps_original"] = tf.tile(features["eps_original"], multiples=[1, 1, self._z_dim // self._num_groups], name="eps_group_tile")
-        features["eps_original"] = tf.reshape(features["eps_original"], [num_sub_steps*self._num_eps, -1], name="reshape_eps_2")
+        features["eps_original"] = tf.reshape(features["eps_original"], [features["z"].shape[0], -1], name="reshape_eps_2")
 
     features["eps"] = tf.tile(features["eps_original"], multiples=[self._g_bs // self._num_eps, 1], name="eps")
     
