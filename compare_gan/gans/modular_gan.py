@@ -484,6 +484,8 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     if self.conditional:
       assert "sampled_labels" in features
       features["sampled_y"] = self._get_one_hot_labels(features["sampled_labels"])
+
+    logging.info("$$$$$$$$$$$$ sample inputs are x=%s", features["sampled_y"].shape)
         
     # Assuming num_sub_steps = 1 (which is true for GPU) for below code to work:
     
