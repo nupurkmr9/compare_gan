@@ -681,8 +681,8 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
       self._tpu_summary.scalar("loss/d_{}".format(i), d_loss)
     self._tpu_summary.scalar("loss/g", g_loss)
     self._tpu_summary.scalar("aux_loss/g", aux_loss)
-    if 'multi_label_classification' in self._which_eps_distr:
-        self._tpu_summary.scalar("aux_acc/g", self.aux_acc) # Doesn't work for d_steps > 1
+    # if 'multi_label_classification' in self._which_eps_distr:
+    #     self._tpu_summary.scalar("aux_acc/g", self.aux_acc) # Doesn't work for d_steps > 1
     # Can add to below lines for fs[0]["eps_generated"] and fs[0]["disc_generated"].
     # self._add_images_to_summary(fs[0]["generated"], "fake_images", params)
     # self._add_images_to_summary(fs[0]["images"], "real_images", params)
