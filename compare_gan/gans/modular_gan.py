@@ -501,12 +501,12 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         features["random_mask"] = tf.less(features["random"], 0.5, name="random_mask")
         features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[self._num_eps, self._z_dim]), tf.constant(self._eps_min, shape=[self._num_eps, self._z_dim]), name="eps_original")
     elif self._which_eps_distr == 'multi_label_classification_group':
-        features["random"] = tf.random.uniform(shape=[self._num_eps, self._num_groups], minval=0.0, maxval=1.0, name="random")
+        features["random"] = tf.random.uniform(shape=[num_sub_steps*self._num_eps, self._num_groups], minval=0.0, maxval=1.0, name="random")
         features["random_mask"] = tf.less(features["random"], 0.5, name="random_mask")
-        features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[self._num_eps, self._num_groups]), tf.constant(self._eps_min, shape=[self._num_eps, self._num_groups]), name="eps_original")
-        features["eps_original"] = tf.reshape(features["eps_original"], [self._num_eps, -1, 1], name="reshape_eps_1")
+        features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[num_sub_steps*self._num_eps, self._num_groups]), tf.constant(self._eps_min, shape=[num_sub_steps*self._num_eps, self._num_groups]), name="eps_original")
+        features["eps_original"] = tf.reshape(features["eps_original"], [num_sub_steps*self._num_eps, -1, 1], name="reshape_eps_1")
         features["eps_original"] = tf.tile(features["eps_original"], multiples=[1, 1, self._z_dim // self._num_groups], name="eps_group_tile")
-        features["eps_original"] = tf.reshape(features["eps_original"], [self._num_eps, -1], name="reshape_eps_2")
+        features["eps_original"] = tf.reshape(features["eps_original"], [num_sub_steps*self._num_eps, -1], name="reshape_eps_2")
 
     features["eps"] = tf.tile(features["eps_original"], multiples=[self._g_bs // self._num_eps, 1], name="eps")
     
