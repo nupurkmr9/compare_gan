@@ -491,6 +491,10 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
       features["sampled_y"] = self._get_one_hot_labels(features["sampled_labels"])
 
     logging.info("$$$$$$$$$$$$ sample inputs are x=%s", features["sampled_y"].shape)
+    logging.info("$$$$$$$$$$$$ sample inputs are x=%s", features["z"].shape)
+    logging.info("$$$$$$$$$$$$ sample inputs are x=%s", features["images"].shape)
+
+    
         
     # Assuming num_sub_steps = 1 (which is true for GPU) for below code to work:
     
@@ -560,6 +564,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     # print("6: ", fs, ls)
     # import sys 
     # sys.exit(0)
+    logging.info("$$$$$$$$$$$$ sample inputs are x=%s", f["disc_eps_generated"].shape)
     return fs, ls
 
   def _train_discriminator(self, features, labels, step, optimizer, params):
