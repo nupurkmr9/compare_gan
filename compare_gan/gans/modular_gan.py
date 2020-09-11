@@ -818,6 +818,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     """
     generated = features["generated"]
     eps_generated = features["eps_generated"]
+    eps_bs_gen = features["generated"].get_shape().as_list()[0]
     
     if self.conditional: # Not modified to have different batch sizes for d_real, d_fake and g.
       sampled_y = self._get_one_hot_labels(features["sampled_labels"])
@@ -845,8 +846,8 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
     # D_in_op_eg = tf.nn.avg_pool2d(D_in_op_eg, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
     #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_eg")
-    D_in_op_g = tf.reshape(D_in_op_g, [self._g_bs, -1], name="reshape_g")
-    D_in_op_eg = tf.reshape(D_in_op_eg, [self._g_bs, -1], name="reshape_eg")
+    D_in_op_g = tf.reshape(D_in_op_g, [eps_bs_gen , -1], name="reshape_g")
+    D_in_op_eg = tf.reshape(D_in_op_eg, [eps_bs_gen , -1], name="reshape_eg")
     
     if self._choice_of_f == 'subtract':
         f = tf.subtract(D_in_op_g, D_in_op_eg)
