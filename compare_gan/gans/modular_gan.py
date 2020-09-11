@@ -490,6 +490,9 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
       assert "sampled_labels" in features
       features["sampled_y"] = self._get_one_hot_labels(features["sampled_labels"])
 
+    eps_bs = features["z"].get_shape().as_list()[0]
+    half_bs = eps_bs // (2*num_sub_steps)
+
     logging.info("$$$$$$$$$$$$ sample inputs are x=%s", features["sampled_y"].shape)
     logging.info("$$$$$$$$$$$$ sample inputs are x=%s", features["z"].shape)
     logging.info("$$$$$$$$$$$$ sample inputs are x=%s", features["images"].shape)
@@ -512,7 +515,6 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         features["random_mask"] = tf.less(features["random"], 0.5, name="random_mask")
         features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[self._num_eps, self._z_dim]), tf.constant(self._eps_min, shape=[self._num_eps, self._z_dim]), name="eps_original")
     elif self._which_eps_distr == 'multi_label_classification_group':
-        eps_bs = features["z"].get_shape().as_list()[0]
         features["random"] = tf.random.uniform(shape=[eps_bs, self._num_groups], minval=0.0, maxval=1.0, name="random")
         features["random_mask"] = tf.less(features["random"], 0.5, name="random_mask")
         features["eps_original"] = tf.where(features["random_mask"], tf.constant(self._eps_max, shape=[eps_bs, self._num_groups]), tf.constant(self._eps_min, shape=[eps_bs, self._num_groups]), name="eps_original")
@@ -558,8 +560,8 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         sampled_y = f.get("sampled_y", None)
         f["generated"] = self.generator(f["z"], y=sampled_y, is_training=True)
         f["eps_generated"] = self.generator(tf.add(f["z"], f["eps"]), y=sampled_y, is_training=True)
-        f["disc_generated"] = self.generator(f["z"][:self._d_bs], y=sampled_y[:self._d_bs], is_training=True)
-        f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:self._d_bs], y=sampled_y[:self._d_bs:], is_training=True)
+        f["disc_generated"] = self.generator(f["z"][:half_bs], y=sampled_y[:half_bs], is_training=True)
+        f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:half_bs], y=sampled_y[half_bs:], is_training=True)
         
     # print("6: ", fs, ls)
     # import sys 
