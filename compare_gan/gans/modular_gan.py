@@ -487,7 +487,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         
     # Assuming num_sub_steps = 1 (which is true for GPU) for below code to work:
     
-    features["z"] = self.z_generator([self._g_bs, self._z_dim], name="z")
+    features["z"] = self.z_generator([num_sub_steps*self._g_bs, self._z_dim], name="z")
     
     if self._which_eps_distr == 'trunc_normal':
         self.eps_distr = tfp.distributions.TruncatedNormal(loc=0.0, scale=1.0, low=self._eps_min, high=self._eps_max)
