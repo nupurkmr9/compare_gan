@@ -609,7 +609,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
           with tf.control_dependencies([train_op]):
             train_op = ema.apply(g_vars)
       with tf.control_dependencies([train_op]):
-        return tf.identity(self.g_loss), tf.identity(self.aux_loss)
+        return tf.identity(self.g_loss)#, tf.identity(self.aux_loss)
 
     # with tf.control_dependencies(update_ops):
     #   aux_op = aux_optimizer.minimize(
@@ -707,7 +707,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     # Train G.
     with tf.control_dependencies(d_losses):
       with tf.name_scope("gen_step"):
-        g_loss, aux_loss = train_gen_fn()
+        g_loss = train_gen_fn()
 
     self._tpu_summary.scalar("step/d", disc_step)
     self._tpu_summary.scalar("step/g", gen_step)
