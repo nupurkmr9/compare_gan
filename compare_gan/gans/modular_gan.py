@@ -856,54 +856,54 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         d_real=None, d_fake=d_fake, d_real_logits=None,
         d_fake_logits=d_fake_logits)
     
-    _, _, _, g_loss_eps = loss_lib.get_losses(
-        d_real=None, d_fake=d_fake_eps, d_real_logits=None,
-        d_fake_logits=d_fake_logits_eps)
+    # _, _, _, g_loss_eps = loss_lib.get_losses(
+    #     d_real=None, d_fake=d_fake_eps, d_real_logits=None,
+    #     d_fake_logits=d_fake_logits_eps)
 
     self.g_loss = g_loss #+ 0.5*g_loss_eps
-    self.aux_loss = g_loss_eps
+    self.aux_loss = 0.0
     
-    # # D_in_op_g = tf.nn.avg_pool2d(D_in_op_g, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
-    # #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
-    # # D_in_op_eg = tf.nn.avg_pool2d(D_in_op_eg, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
-    # #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_eg")
-    # D_in_op_g = tf.reshape(D_in_op_g, [eps_bs_gen , -1], name="reshape_g")
-    # D_in_op_eg = tf.reshape(D_in_op_eg, [eps_bs_gen , -1], name="reshape_eg")
+    # D_in_op_g = tf.nn.avg_pool2d(D_in_op_g, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
+    #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
+    # D_in_op_eg = tf.nn.avg_pool2d(D_in_op_eg, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
+    #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_eg")
+    D_in_op_g = tf.reshape(D_in_op_g, [eps_bs_gen , -1], name="reshape_g")
+    D_in_op_eg = tf.reshape(D_in_op_eg, [eps_bs_gen , -1], name="reshape_eg")
     
-    # if self._choice_of_f == 'subtract':
-    #     f = tf.subtract(D_in_op_g, D_in_op_eg)
-    # elif self._choice_of_f == 'concat':
-    #     f = tf.concat([D_in_op_g, D_in_op_eg], axis=1)
+    if self._choice_of_f == 'subtract':
+        f = tf.subtract(D_in_op_g, D_in_op_eg)
+    elif self._choice_of_f == 'concat':
+        f = tf.concat([D_in_op_g, D_in_op_eg], axis=1)
     
-    # pred_eps = self.aux_network(f)
+    pred_eps = self.aux_network(f)
 
     
-    # if self._which_eps_distr == 'multi_label_classification':
-    #     features["labels_mask"] = tf.less(features["eps"], 0.0, name="labels_mask")
-    #     features["labels_aux"] = tf.where(features["labels_mask"], tf.constant(0.0, shape=[self._g_bs, self._z_dim]), tf.constant(1.0, shape=[self._g_bs, self._z_dim]), name="labels")
-    #     self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps)
-    #     # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
-    #     self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels_aux"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
-    #     self.g_loss += self._lambda_bce_loss * self.aux_loss
-    #     return
-    # elif self._which_eps_distr == 'multi_label_classification_group':
-    #     features["labels_aux"] = tf.cast(features["random_mask"], tf.float32, name="labels")
-    #     self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps) # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
-    #     self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels_aux"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
-    #     self.g_loss += self._lambda_bce_loss * self.aux_loss
-    #     return
+    if self._which_eps_distr == 'multi_label_classification':
+        features["labels_mask"] = tf.less(features["eps"], 0.0, name="labels_mask")
+        features["labels_aux"] = tf.where(features["labels_mask"], tf.constant(0.0, shape=[self._g_bs, self._z_dim]), tf.constant(1.0, shape=[self._g_bs, self._z_dim]), name="labels")
+        self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps)
+        # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
+        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels_aux"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
+        self.g_loss += self._lambda_bce_loss * self.aux_loss
+        return
+    elif self._which_eps_distr == 'multi_label_classification_group':
+        features["labels_aux"] = tf.cast(features["random_mask"], tf.float32, name="labels")
+        self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps) # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
+        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels_aux"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
+        self.g_loss += self._lambda_bce_loss * self.aux_loss
+        return
     
-    # eps = features["eps"]
-    # pred_eps.get_shape().assert_is_compatible_with(eps.get_shape())
-    # if self._use_tanh and (self._which_eps_distr == 'trunc_normal' or self._which_eps_distr == 'uniform'): # Tanh activation can be used if we sample eps from truncated normal distribution or uniform distruibution.
-    #     pred_eps = tf.tanh(pred_eps)
-    #     pred_eps = tf.multiply(pred_eps, self._eps_max)
-    # if self._aet_loss == 'L2':
-    #     self.aux_loss = tf.reduce_mean(tf.squared_difference(pred_eps, eps))
-    # elif self._aet_loss == 'L1':
-    #     self.aux_loss = tf.losses.huber_loss(pred_eps, eps)
+    eps = features["eps"]
+    pred_eps.get_shape().assert_is_compatible_with(eps.get_shape())
+    if self._use_tanh and (self._which_eps_distr == 'trunc_normal' or self._which_eps_distr == 'uniform'): # Tanh activation can be used if we sample eps from truncated normal distribution or uniform distruibution.
+        pred_eps = tf.tanh(pred_eps)
+        pred_eps = tf.multiply(pred_eps, self._eps_max)
+    if self._aet_loss == 'L2':
+        self.aux_loss = tf.reduce_mean(tf.squared_difference(pred_eps, eps))
+    elif self._aet_loss == 'L1':
+        self.aux_loss = tf.losses.huber_loss(pred_eps, eps)
     
-    # self.g_loss += self._lambda_bce_loss * self.aux_loss
+    self.g_loss += self._lambda_bce_loss * self.aux_loss
     
 
 
