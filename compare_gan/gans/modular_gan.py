@@ -593,9 +593,9 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     self.create_g_loss(features, labels, params=params)
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
-      aux_op = aux_optimizer.minimize(
-          self.aux_loss,
-          var_list=self.aux_network.trainable_variables)
+      # aux_op = aux_optimizer.minimize(
+      #     self.aux_loss,
+      #     var_list=self.aux_network.trainable_variables)
       with tf.control_dependencies([aux_op]):
         train_op = optimizer.minimize(
             self.g_loss,
@@ -695,7 +695,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     for i, d_loss in enumerate(d_losses):
       self._tpu_summary.scalar("loss/d_{}".format(i), d_loss)
     self._tpu_summary.scalar("loss/g", g_loss)
-    self._tpu_summary.scalar("aux_loss/g", aux_loss)
+    # self._tpu_summary.scalar("aux_loss/g", aux_loss)
     # if 'multi_label_classification' in self._which_eps_distr:
     #     self._tpu_summary.scalar("aux_acc/g", self.aux_acc) # Doesn't work for d_steps > 1
     # Can add to below lines for fs[0]["eps_generated"] and fs[0]["disc_generated"].
