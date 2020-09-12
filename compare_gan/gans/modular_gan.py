@@ -560,8 +560,8 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         sampled_y = f.get("sampled_y", None)
         f["generated"] = self.generator(f["z"], y=sampled_y, is_training=True)
         f["eps_generated"] = self.generator(tf.add(f["z"], f["eps"]), y=sampled_y, is_training=True)
-        f["disc_generated"] = self.generator(f["z"][:half_bs], y=sampled_y[:half_bs], is_training=True)
-        f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:half_bs], y=sampled_y[half_bs:], is_training=True)
+        f["disc_generated"] = self.generator(f["z"], y=sampled_y, is_training=True)
+        # f["disc_eps_generated"] = self.generator(tf.add(f["z"], f["eps"])[:half_bs], y=sampled_y[half_bs:], is_training=True)
         
     # print("6: ", fs, ls)
     # import sys 
@@ -572,7 +572,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
   def _train_discriminator(self, features, labels, step, optimizer, params):
     features = features.copy()
     features["disc_generated"] = tf.stop_gradient(features["disc_generated"])
-    features["disc_eps_generated"] = tf.stop_gradient(features["disc_eps_generated"])
+    # features["disc_eps_generated"] = tf.stop_gradient(features["disc_eps_generated"])
     # Set the random offset tensor for operations in tpu_random.py.
     # tpu_random.set_random_offset_from_features(features) # Decide later if we need to comment out this line or not.
     # create_loss will set self.d_loss.
@@ -592,47 +592,47 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     # create_loss will set self.g_loss.
     self.create_g_loss(features, labels, params=params)
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-    with tf.control_dependencies(update_ops):
-      train_op = optimizer.minimize(
-          self.g_loss,
-          var_list=self.generator.trainable_variables,
-          global_step=step)
-      if self._g_use_ema:
-        g_vars = self.generator.trainable_variables
-        with tf.name_scope("generator_ema"):
-          logging.info("Creating moving averages of weights: %s", g_vars)
-          # The decay value is set to 0 if we're before the moving-average start
-          # point, so that the EMA vars will be the normal vars.
-          decay = self._ema_decay * tf.cast(
-              tf.greater_equal(step, self._ema_start_step), tf.float32)
-          ema = tf.train.ExponentialMovingAverage(decay=decay)
-          with tf.control_dependencies([train_op]):
-            train_op = ema.apply(g_vars)
-      with tf.control_dependencies([train_op]):
-        return tf.identity(self.g_loss)#, tf.identity(self.aux_loss)
-
     # with tf.control_dependencies(update_ops):
-    #   aux_op = aux_optimizer.minimize(
-    #       self.aux_loss,
-    #       var_list=self.aux_network.trainable_variables)
-    #   with tf.control_dependencies([aux_op]):
-    #     train_op = optimizer.minimize(
-    #         self.g_loss,
-    #         var_list=self.generator.trainable_variables,
-    #         global_step=step)
-    #     if self._g_use_ema:
-    #       g_vars = self.generator.trainable_variables
-    #       with tf.name_scope("generator_ema"):
-    #         logging.info("Creating moving averages of weights: %s", g_vars)
-    #         # The decay value is set to 0 if we're before the moving-average start
-    #         # point, so that the EMA vars will be the normal vars.
-    #         decay = self._ema_decay * tf.cast(
-    #             tf.greater_equal(step, self._ema_start_step), tf.float32)
-    #         ema = tf.train.ExponentialMovingAverage(decay=decay)
-    #         with tf.control_dependencies([train_op]):
-    #           train_op = ema.apply(g_vars)
-    #     with tf.control_dependencies([train_op]):
-    #       return tf.identity(self.g_loss), tf.identity(self.aux_loss)
+    #   train_op = optimizer.minimize(
+    #       self.g_loss,
+    #       var_list=self.generator.trainable_variables,
+    #       global_step=step)
+    #   if self._g_use_ema:
+    #     g_vars = self.generator.trainable_variables
+    #     with tf.name_scope("generator_ema"):
+    #       logging.info("Creating moving averages of weights: %s", g_vars)
+    #       # The decay value is set to 0 if we're before the moving-average start
+    #       # point, so that the EMA vars will be the normal vars.
+    #       decay = self._ema_decay * tf.cast(
+    #           tf.greater_equal(step, self._ema_start_step), tf.float32)
+    #       ema = tf.train.ExponentialMovingAverage(decay=decay)
+    #       with tf.control_dependencies([train_op]):
+    #         train_op = ema.apply(g_vars)
+    #   with tf.control_dependencies([train_op]):
+    #     return tf.identity(self.g_loss)#, tf.identity(self.aux_loss)
+
+    with tf.control_dependencies(update_ops):
+      aux_op = aux_optimizer.minimize(
+          self.aux_loss,
+          var_list=self.aux_network.trainable_variables)
+      with tf.control_dependencies([aux_op]):
+        train_op = optimizer.minimize(
+            self.g_loss,
+            var_list=self.generator.trainable_variables,
+            global_step=step)
+        if self._g_use_ema:
+          g_vars = self.generator.trainable_variables
+          with tf.name_scope("generator_ema"):
+            logging.info("Creating moving averages of weights: %s", g_vars)
+            # The decay value is set to 0 if we're before the moving-average start
+            # point, so that the EMA vars will be the normal vars.
+            decay = self._ema_decay * tf.cast(
+                tf.greater_equal(step, self._ema_start_step), tf.float32)
+            ema = tf.train.ExponentialMovingAverage(decay=decay)
+            with tf.control_dependencies([train_op]):
+              train_op = ema.apply(g_vars)
+        with tf.control_dependencies([train_op]):
+          return tf.identity(self.g_loss), tf.identity(self.aux_loss)
 
   def model_fn(self, features, labels, params, mode):
     """Constructs the model for the given features and mode.
@@ -707,7 +707,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     # Train G.
     with tf.control_dependencies(d_losses):
       with tf.name_scope("gen_step"):
-        g_loss = train_gen_fn()
+        g_loss, aux_loss = train_gen_fn()
 
     self._tpu_summary.scalar("step/d", disc_step)
     self._tpu_summary.scalar("step/g", gen_step)
@@ -775,9 +775,10 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
       ValueError: If set of meta/hyper parameters is not supported.
     """
     images = features["images"]  # Real images.
-    generated = features["disc_generated"]
-    eps_generated = features["disc_eps_generated"]
-    fake_images = tf.concat([generated, eps_generated], axis=0)
+    # generated = features["disc_generated"]
+    fake_images = features["disc_generated"]
+    # eps_generated = features["disc_eps_generated"]
+    # fake_images = tf.concat([generated, eps_generated], axis=0)
     
     if self.conditional: # Not modified to have different batch sizes for d_real, d_fake and g.
       y = self._get_one_hot_labels(labels)
@@ -855,52 +856,52 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         d_real=None, d_fake=d_fake, d_real_logits=None,
         d_fake_logits=d_fake_logits)
     
-    _, _, _, g_loss_eps = loss_lib.get_losses(
-        d_real=None, d_fake=d_fake_eps, d_real_logits=None,
-        d_fake_logits=d_fake_logits_eps)
+    # _, _, _, g_loss_eps = loss_lib.get_losses(
+    #     d_real=None, d_fake=d_fake_eps, d_real_logits=None,
+    #     d_fake_logits=d_fake_logits_eps)
 
-    self.g_loss = 0.5*g_loss + 0.5*g_loss_eps
+    self.g_loss = g_loss #+ 0.5*g_loss_eps
     
-    # D_in_op_g = tf.nn.avg_pool2d(D_in_op_g, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
-    #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
-    # D_in_op_eg = tf.nn.avg_pool2d(D_in_op_eg, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
-    #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_eg")
-    # D_in_op_g = tf.reshape(D_in_op_g, [eps_bs_gen , -1], name="reshape_g")
-    # D_in_op_eg = tf.reshape(D_in_op_eg, [eps_bs_gen , -1], name="reshape_eg")
+    D_in_op_g = tf.nn.avg_pool2d(D_in_op_g, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
+                                 [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
+    D_in_op_eg = tf.nn.avg_pool2d(D_in_op_eg, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
+                                 [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_eg")
+    D_in_op_g = tf.reshape(D_in_op_g, [eps_bs_gen , -1], name="reshape_g")
+    D_in_op_eg = tf.reshape(D_in_op_eg, [eps_bs_gen , -1], name="reshape_eg")
     
-    # if self._choice_of_f == 'subtract':
-    #     f = tf.subtract(D_in_op_g, D_in_op_eg)
-    # elif self._choice_of_f == 'concat':
-    #     f = tf.concat([D_in_op_g, D_in_op_eg], axis=1)
+    if self._choice_of_f == 'subtract':
+        f = tf.subtract(D_in_op_g, D_in_op_eg)
+    elif self._choice_of_f == 'concat':
+        f = tf.concat([D_in_op_g, D_in_op_eg], axis=1)
     
-    # pred_eps = self.aux_network(f)
+    pred_eps = self.aux_network(f)
     
-    # if self._which_eps_distr == 'multi_label_classification':
-    #     features["labels_mask"] = tf.less(features["eps"], 0.0, name="labels_mask")
-    #     features["labels_aux"] = tf.where(features["labels_mask"], tf.constant(0.0, shape=[self._g_bs, self._z_dim]), tf.constant(1.0, shape=[self._g_bs, self._z_dim]), name="labels")
-    #     self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps)
-    #     # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
-    #     self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
-    #     self.g_loss += self._lambda_bce_loss * self.aux_loss
-    #     return
-    # elif self._which_eps_distr == 'multi_label_classification_group':
-    #     features["labels_aux"] = tf.cast(features["random_mask"], tf.float32, name="labels")
-    #     self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps) # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
-    #     self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
-    #     self.g_loss += self._lambda_bce_loss * self.aux_loss
-    #     return
+    if self._which_eps_distr == 'multi_label_classification':
+        features["labels_mask"] = tf.less(features["eps"], 0.0, name="labels_mask")
+        features["labels_aux"] = tf.where(features["labels_mask"], tf.constant(0.0, shape=[self._g_bs, self._z_dim]), tf.constant(1.0, shape=[self._g_bs, self._z_dim]), name="labels")
+        self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps)
+        # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
+        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
+        self.g_loss += self._lambda_bce_loss * self.aux_loss
+        return
+    elif self._which_eps_distr == 'multi_label_classification_group':
+        features["labels_aux"] = tf.cast(features["random_mask"], tf.float32, name="labels")
+        self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps) # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
+        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
+        self.g_loss += self._lambda_bce_loss * self.aux_loss
+        return
     
-    # eps = features["eps"]
-    # pred_eps.get_shape().assert_is_compatible_with(eps.get_shape())
-    # if self._use_tanh and (self._which_eps_distr == 'trunc_normal' or self._which_eps_distr == 'uniform'): # Tanh activation can be used if we sample eps from truncated normal distribution or uniform distruibution.
-    #     pred_eps = tf.tanh(pred_eps)
-    #     pred_eps = tf.multiply(pred_eps, self._eps_max)
-    # if self._aet_loss == 'L2':
-    #     self.aux_loss = tf.reduce_mean(tf.squared_difference(pred_eps, eps))
-    # elif self._aet_loss == 'L1':
-    #     self.aux_loss = tf.losses.huber_loss(pred_eps, eps)
+    eps = features["eps"]
+    pred_eps.get_shape().assert_is_compatible_with(eps.get_shape())
+    if self._use_tanh and (self._which_eps_distr == 'trunc_normal' or self._which_eps_distr == 'uniform'): # Tanh activation can be used if we sample eps from truncated normal distribution or uniform distruibution.
+        pred_eps = tf.tanh(pred_eps)
+        pred_eps = tf.multiply(pred_eps, self._eps_max)
+    if self._aet_loss == 'L2':
+        self.aux_loss = tf.reduce_mean(tf.squared_difference(pred_eps, eps))
+    elif self._aet_loss == 'L1':
+        self.aux_loss = tf.losses.huber_loss(pred_eps, eps)
     
-    # self.g_loss += self._lambda_bce_loss * self.aux_loss
+    self.g_loss += self._lambda_bce_loss * self.aux_loss
     
 
 
