@@ -53,7 +53,7 @@ run_config.save_checkpoints_steps = 2500
 run_eval.start_step = 40000
 
 
-ModularGAN_Aux_Task_AET_v2.d_bs = 1024
+ModularGAN_Aux_Task_AET_v2.d_bs = 2048
 ModularGAN_Aux_Task_AET_v2.g_bs = 2048
 ModularGAN_Aux_Task_AET_v2.aux_ip_size = 1
 ModularGAN_Aux_Task_AET_v2.aux_ip_channels = 1536
