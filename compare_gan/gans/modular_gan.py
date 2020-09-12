@@ -593,27 +593,46 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     self.create_g_loss(features, labels, params=params)
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
-      # aux_op = aux_optimizer.minimize(
-      #     self.aux_loss,
-      #     var_list=self.aux_network.trainable_variables)
-      with tf.control_dependencies([aux_op]):
-        train_op = optimizer.minimize(
-            self.g_loss,
-            var_list=self.generator.trainable_variables,
-            global_step=step)
-        if self._g_use_ema:
-          g_vars = self.generator.trainable_variables
-          with tf.name_scope("generator_ema"):
-            logging.info("Creating moving averages of weights: %s", g_vars)
-            # The decay value is set to 0 if we're before the moving-average start
-            # point, so that the EMA vars will be the normal vars.
-            decay = self._ema_decay * tf.cast(
-                tf.greater_equal(step, self._ema_start_step), tf.float32)
-            ema = tf.train.ExponentialMovingAverage(decay=decay)
-            with tf.control_dependencies([train_op]):
-              train_op = ema.apply(g_vars)
-        with tf.control_dependencies([train_op]):
-          return tf.identity(self.g_loss), tf.identity(self.aux_loss)
+      train_op = optimizer.minimize(
+          self.g_loss,
+          var_list=self.generator.trainable_variables,
+          global_step=step)
+      if self._g_use_ema:
+        g_vars = self.generator.trainable_variables
+        with tf.name_scope("generator_ema"):
+          logging.info("Creating moving averages of weights: %s", g_vars)
+          # The decay value is set to 0 if we're before the moving-average start
+          # point, so that the EMA vars will be the normal vars.
+          decay = self._ema_decay * tf.cast(
+              tf.greater_equal(step, self._ema_start_step), tf.float32)
+          ema = tf.train.ExponentialMovingAverage(decay=decay)
+          with tf.control_dependencies([train_op]):
+            train_op = ema.apply(g_vars)
+      with tf.control_dependencies([train_op]):
+        return tf.identity(self.g_loss), tf.identity(self.aux_loss)
+
+    # with tf.control_dependencies(update_ops):
+    #   aux_op = aux_optimizer.minimize(
+    #       self.aux_loss,
+    #       var_list=self.aux_network.trainable_variables)
+    #   with tf.control_dependencies([aux_op]):
+    #     train_op = optimizer.minimize(
+    #         self.g_loss,
+    #         var_list=self.generator.trainable_variables,
+    #         global_step=step)
+    #     if self._g_use_ema:
+    #       g_vars = self.generator.trainable_variables
+    #       with tf.name_scope("generator_ema"):
+    #         logging.info("Creating moving averages of weights: %s", g_vars)
+    #         # The decay value is set to 0 if we're before the moving-average start
+    #         # point, so that the EMA vars will be the normal vars.
+    #         decay = self._ema_decay * tf.cast(
+    #             tf.greater_equal(step, self._ema_start_step), tf.float32)
+    #         ema = tf.train.ExponentialMovingAverage(decay=decay)
+    #         with tf.control_dependencies([train_op]):
+    #           train_op = ema.apply(g_vars)
+    #     with tf.control_dependencies([train_op]):
+    #       return tf.identity(self.g_loss), tf.identity(self.aux_loss)
 
   def model_fn(self, features, labels, params, mode):
     """Constructs the model for the given features and mode.
