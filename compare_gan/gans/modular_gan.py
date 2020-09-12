@@ -566,7 +566,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     # print("6: ", fs, ls)
     # import sys 
     # sys.exit(0)
-    logging.info("$$$$$$$$$$$$ sample inputs are x=%s", f["disc_eps_generated"].shape)
+    # logging.info("$$$$$$$$$$$$ sample inputs are x=%s", f["disc_eps_generated"].shape)
     return fs, ls
 
   def _train_discriminator(self, features, labels, step, optimizer, params):
