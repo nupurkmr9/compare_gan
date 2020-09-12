@@ -856,12 +856,12 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         d_real=None, d_fake=d_fake, d_real_logits=None,
         d_fake_logits=d_fake_logits)
     
-    # _, _, _, g_loss_eps = loss_lib.get_losses(
-    #     d_real=None, d_fake=d_fake_eps, d_real_logits=None,
-    #     d_fake_logits=d_fake_logits_eps)
+    _, _, _, g_loss_eps = loss_lib.get_losses(
+        d_real=None, d_fake=d_fake_eps, d_real_logits=None,
+        d_fake_logits=d_fake_logits_eps)
 
     self.g_loss = g_loss #+ 0.5*g_loss_eps
-    self.aux_loss = 0.0
+    self.aux_loss = g_loss_eps
     
     # # D_in_op_g = tf.nn.avg_pool2d(D_in_op_g, [self._aux_avg_pool_sz, self._aux_avg_pool_sz], 
     # #                              [self._aux_avg_pool_sz, self._aux_avg_pool_sz], padding='VALID', data_format='NHWC', name="avg_pool_g")
