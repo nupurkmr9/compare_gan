@@ -881,13 +881,13 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         features["labels_aux"] = tf.where(features["labels_mask"], tf.constant(0.0, shape=[self._g_bs, self._z_dim]), tf.constant(1.0, shape=[self._g_bs, self._z_dim]), name="labels")
         self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps)
         # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
-        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
+        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels_aux"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
         self.g_loss += self._lambda_bce_loss * self.aux_loss
         return
     elif self._which_eps_distr == 'multi_label_classification_group':
         features["labels_aux"] = tf.cast(features["random_mask"], tf.float32, name="labels")
         self.aux_loss = tf.losses.sigmoid_cross_entropy(features["labels_aux"],pred_eps) # tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=pred_eps, labels=features["labels"], name="aux_cross_entropy"))
-        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
+        self.aux_acc = tf.reduce_mean(tf.cast(tf.equal(features["labels_aux"], tf.round(tf.sigmoid(pred_eps))), dtype=tf.float32))
         self.g_loss += self._lambda_bce_loss * self.aux_loss
         return
     
