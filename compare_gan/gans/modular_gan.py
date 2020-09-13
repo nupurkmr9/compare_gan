@@ -628,8 +628,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     self._tpu_summary = tpu_summaries.TpuSummaries(self._model_dir)
 
     # Get features for each sub-step.
-    fs, ls = self._split_inputs_and_generate_samples(
-        features, labels, num_sub_steps=num_sub_steps)
+    fs, ls = self._split_inputs_and_generate_samples(features, labels, num_sub_steps=num_sub_steps)
 
     disc_optimizer = self.get_disc_optimizer(params["use_tpu"])
     disc_step = tf.get_variable(
@@ -641,6 +640,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
         params=params)
 
     gen_optimizer = self.get_gen_optimizer(params["use_tpu"])
+    aux_optimizer = self.get_aux_optimizer(params["use_tpu"])
     gen_step = tf.train.get_or_create_global_step()
     train_gen_fn = functools.partial(
         self._train_generator,
