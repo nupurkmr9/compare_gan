@@ -592,7 +592,7 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
             with tf.control_dependencies([train_op]):
               train_op = ema.apply(g_vars)
         with tf.control_dependencies([train_op]):
-          return tf.identity(self.g_loss)
+          return tf.identity(self.g_loss) ,tf.identity(self.aux_loss)
 
   def model_fn(self, features, labels, params, mode):
     """Constructs the model for the given features and mode.
@@ -667,11 +667,12 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     # Train G.
     with tf.control_dependencies(d_losses):
       with tf.name_scope("gen_step"):
-        g_loss = train_gen_fn()
+        g_loss , aux_loss = train_gen_fn()
 
     for i, d_loss in enumerate(d_losses):
       self._tpu_summary.scalar("loss/d_{}".format(i), d_loss)
     self._tpu_summary.scalar("loss/g", g_loss)
+    self._tpu_summary.scalar("loss/aux", aux_loss)
     # self._add_images_to_summary(fs[0]["generated"], "fake_images", params)
     # self._add_images_to_summary(fs[0]["images"], "real_images", params)
 
