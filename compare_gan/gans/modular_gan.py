@@ -758,10 +758,11 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     else:
       # Compute discriminator output for real and fake images in one batch.
       all_images = tf.concat([images, generated , eps_generated], axis=0)
-      d_all, d_all_logits, _ = self.discriminator(
+      d_all, d_all_logits, D_in_op_all = self.discriminator(
           all_images, y=all_y, is_training=is_training)
-      d_real, d_fake, d_fake_eps= tf.split(d_all, 3)
+      d_real, d_fake, d_fake_eps = tf.split(d_all, 3)
       d_real_logits, d_fake_logits, d_fake_logits_eps = tf.split(d_all_logits, 3)
+      _ , D_in_op_g , D_in_op_eg = tf.split(D_in_op_all, 3)
 
      
     self.d_loss, _, _, _ = loss_lib.get_losses(
