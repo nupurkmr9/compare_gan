@@ -16,7 +16,7 @@ ModularGAN_Aux_Task_AET_v2.conditional = True
 options.batch_size = 2048
 options.gan_class = @ModularGAN_Aux_Task_AET_v2
 options.lamba = 1
-options.training_steps = 250000
+options.training_steps = 10000
 weights.initializer = "orthogonal"
 spectral_norm.singular_value = "auto"
 
@@ -49,7 +49,7 @@ z.distribution_fn = @tf.random.normal
 eval_z.distribution_fn = @tf.random.normal
 
 run_config.iterations_per_loop = 500
-run_config.save_checkpoints_steps = 5000
+run_config.save_checkpoints_steps = 2000
 run_eval.start_step = 40000
 
 
@@ -61,7 +61,7 @@ ModularGAN_Aux_Task_AET_v2.aux_avg_pool_sz = 4
 ModularGAN_Aux_Task_AET_v2.num_eps = 2048
 ModularGAN_Aux_Task_AET_v2.eps_max = 0.4
 ModularGAN_Aux_Task_AET_v2.aux_lr = 0.0001
-ModularGAN_Aux_Task_AET_v2.lambda_bce_loss = 1.
+ModularGAN_Aux_Task_AET_v2.lambda_bce_loss = 0.0
 ModularGAN_Aux_Task_AET_v2.choice_of_f = "concat"
 ModularGAN_Aux_Task_AET_v2.num_groups = 6
 ModularGAN_Aux_Task_AET_v2.which_eps_distr = 'multi_label_classification_group'
