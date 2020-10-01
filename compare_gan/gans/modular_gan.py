@@ -271,17 +271,17 @@ class ModularGAN_Aux_Task_AET_v2(AbstractGAN):
     """Returns a TPUEstimator for this GAN."""
     unroll_graph = self._experimental_force_graph_unroll or use_tpu
     num_sub_steps = self._get_num_sub_steps(unroll_graph=unroll_graph)
-#     return tf.contrib.tpu.TPUEstimator(
-#         config=run_config,
-#         use_tpu=use_tpu,
-#         model_fn=self.model_fn,
-#         train_batch_size=batch_size * num_sub_steps)
     return tf.contrib.tpu.TPUEstimator(
         config=run_config,
         use_tpu=use_tpu,
         model_fn=self.model_fn,
-        train_batch_size=batch_size * num_sub_steps,
-        warm_start_from=tf.estimator.WarmStartSettings(ckpt_to_initialize_from=self._warm_start_ckpt, vars_to_warm_start=['.*']))
+        train_batch_size=batch_size * num_sub_steps)
+#     return tf.contrib.tpu.TPUEstimator(
+#         config=run_config,
+#         use_tpu=use_tpu,
+#         model_fn=self.model_fn,
+#         train_batch_size=batch_size * num_sub_steps,
+#         warm_start_from=tf.estimator.WarmStartSettings(ckpt_to_initialize_from=self._warm_start_ckpt, vars_to_warm_start=['.*']))
 
 
   def _module_fn(self, model, batch_size):
